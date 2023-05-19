@@ -17,7 +17,7 @@ class MovieSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ('title', 'poster_path', 'vote_average', 'genre_id')
+        fields = ('title', 'poster_path', 'vote_average', 'genre_id','movie_id')
 
     genre_id = GenreSerializer(many=True)
 
@@ -29,6 +29,28 @@ class MovieDetailSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ('title', 'poster_path', 'vote_average', 'genre_id', 'overview',)
+        fields = ('title', 'poster_path', 'vote_average', 'genre_id', 'overview', 'released_date')
 
     genre_id = GenreSerializer(many=True)
+
+
+class GenreSearchSerializer(serializers.Serializer):
+    genre_id = serializers.IntegerField(required=False)
+    genre_name = serializers.CharField(required=False)
+
+    def validate(self, attrs):
+        genre_id = attrs.get('genre_id')
+        genre_name = attrs.get('genre_name')
+
+        if not genre_id and not genre_name:
+            raise serializers.ValidationError("Either genre_id or genre_name is required.")
+
+        return attrs
+    
+class GenreMovieSerializers(serializers.ModelSerializer):
+    genre_id = GenreSearchSerializer(many=True)
+
+    class Meta:
+        model = Movie
+        fields = ('title', 'poster_path', 'vote_average', 'genre_id', 'movie_id')
+        
