@@ -8,4 +8,5 @@ urlpatterns = [
     path('random/movies/', views.movie_random_list),
     path('movies/<int:movie_pk>/', views.movie_detail),
     path('movies/search_movies_by_genre/', views.search_movies_by_genre),
+    path('movies/movie_search/', views.movie_search),
 ]

@@ -9,6 +9,7 @@ from .models import Movie, Genre
 from .serializers import GenreSearchSerializer, MovieSerializer, MovieDetailSerializers, GenreSerializer
 import random
 
+from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination
 
 @api_view(['GET'])
@@ -21,9 +22,9 @@ def movie_list(request):
 
 @api_view(['GET']) 
 def movie_random_list(request):
-    movies = get_list_or_404(Movie)
+    movies = list(Movie.objects.filter(released_date__year__gte=1990))
     random.shuffle(movies)
-    sliced_movies = movies[:50]  # 50개만 가져오도록 설정
+    sliced_movies = movies[:100]  # 100개만 가져오도록 설정
     serializer = MovieSerializer(sliced_movies, many=True)
     return Response(serializer.data)
 
@@ -55,6 +56,15 @@ def search_movies_by_genre(request):
         else:
             movies = []
 
+    serializer = MovieSerializer(movies, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def movie_search(request):
+    keyword = request.GET.get('keyword', '')  # 사용자가 입력한 키워드를 가져옴
+    
+    movies = Movie.objects.filter(Q(title__icontains=keyword)) #| Q(overview__icontains=keyword))
+    
     serializer = MovieSerializer(movies, many=True)
     return Response(serializer.data)
 
