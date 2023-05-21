@@ -60,10 +60,10 @@ def search_movies_by_genre(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
-def movie_search(request):
-    keyword = request.GET.get('keyword', '')  # 사용자가 입력한 키워드를 가져옴
+def movie_search(request,searchKeyword):
+    # searchKeyword = request.GET.get('searchKeyword', '')  # 사용자가 입력한 키워드를 가져옴
     
-    movies = Movie.objects.filter(Q(title__icontains=keyword)) #| Q(overview__icontains=keyword))
+    movies = Movie.objects.filter(Q(title__icontains=searchKeyword)) #| Q(overview__icontains=searchKeyword))
     
     serializer = MovieSerializer(movies, many=True)
     return Response(serializer.data)
