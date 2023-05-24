@@ -94,21 +94,40 @@ def movie_search(request,searchKeyword):
 #             return JsonResponse({'message': '영화를 찾을 수 없습니다.'}, status=404)
     
     
-@api_view(['POST'])
+@api_view(['GET','POST'])
 def like(request, movie_pk):
-    if request.user.is_authenticated:
-        movie = get_object_or_404(Movie, pk=movie_pk)
-        # user = request.user
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            movie = get_object_or_404(Movie, pk=movie_pk)
+            # user = request.user
 
-        if movie.like_users.filter(pk=request.user.pk).exists():
-            movie.like_users.remove(request.user)
-        else:
-            movie.like_users.add(request.user)
-        context = {
-            'like_count': movie.like_users.count(),
-        }
-        return JsonResponse(context)
-    return JsonResponse({'message': '잘못된 요청입니다.'}, status=400)
+            if movie.like_users.filter(pk=request.user.pk).exists():
+                movie.like_users.remove(request.user)
+                is_liked = False
+            else:
+                movie.like_users.add(request.user)
+                is_liked = True
+            context = {
+                'like_count': movie.like_users.count(),
+                'is_liked': is_liked,
+            }
+            return JsonResponse(context)
+        return JsonResponse({'message': '잘못된 요청입니다.'}, status=400)
+    elif request.method == "GET":
+        if request.user.is_authenticated:
+            movie = get_object_or_404(Movie, pk=movie_pk)
+            if movie.like_users.filter(pk=request.user.pk).exists():
+                is_liked = True
+            else:
+                is_liked = False
+            context = {
+                'like_count': movie.like_users.count(),
+                'is_liked': is_liked,
+            }
+            return JsonResponse(context)
+        return JsonResponse({'message': '잘못된 요청입니다.'}, status=400)
+
+
 
 @api_view(['GET'])
 def get_favorite_movies(request):
