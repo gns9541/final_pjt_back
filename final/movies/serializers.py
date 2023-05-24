@@ -29,7 +29,7 @@ class MovieDetailSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ('title', 'poster_path', 'vote_average', 'genre_id', 'overview', 'released_date')
+        fields = ('title', 'poster_path', 'vote_average', 'genre_id', 'overview', 'released_date','like_users')
 
     genre_id = GenreSerializer(many=True)
 
@@ -52,5 +52,10 @@ class GenreMovieSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ('title', 'poster_path', 'vote_average', 'genre_id', 'movie_id')
-        
+        fields = ('title', 'poster_path', 'vote_average', 'genre_id', 'movie_id','like_users')
+
+
+# class UserFavoriteMovieSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = UserFavoriteMovie
+#         fields = '__all__'

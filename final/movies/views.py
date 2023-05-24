@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 # Create your views here.
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_list_or_404, get_object_or_404
@@ -9,8 +9,11 @@ from .models import Movie, Genre
 from .serializers import GenreSearchSerializer, MovieSerializer, MovieDetailSerializers, GenreSerializer
 import random
 
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination
+from django.http import JsonResponse
+from rest_framework.authentication import TokenAuthentication
 
 @api_view(['GET'])
 def movie_list(request):
@@ -69,6 +72,52 @@ def movie_search(request,searchKeyword):
     return Response(serializer.data)
 
 
+# @login_required
+# @api_view(['POST'])
+# @authentication_classes([TokenAuthentication])
+# def add_favorite_movie(request, movie_id):
+#     if request.user.is_authenticated:
+#         movie = get_object_or_404(UserFavoriteMovie, pk=movie_id)
+#         # user = request.user
+
+#             # 이미 찜한 영화인지 확인
+#         if UserFavoriteMovie.objects.filter(user=user, movie=movie).exists():
+#                 return JsonResponse({'message': '이미 찜한 영화입니다.'}, status=400)
+            
+#             # 찜한 영화 추가
+#             favorite_movie = UserFavoriteMovie.objects.create(user=user, movie=movie)
+#             serializer = UserFavoriteMovieSerializer(favorite_movie)
+            
+#             return JsonResponse(serializer.data, status=201)
+        
+#         except Movie.DoesNotExist:
+#             return JsonResponse({'message': '영화를 찾을 수 없습니다.'}, status=404)
+    
+    
+@api_view(['POST'])
+def like(request, movie_pk):
+    if request.user.is_authenticated:
+        movie = get_object_or_404(Movie, pk=movie_pk)
+        # user = request.user
+
+        if movie.like_users.filter(pk=request.user.pk).exists():
+            movie.like_users.remove(request.user)
+        else:
+            movie.like_users.add(request.user)
+        context = {
+            'like_count': movie.like_users.count(),
+        }
+        return JsonResponse(context)
+    return JsonResponse({'message': '잘못된 요청입니다.'}, status=400)
+
+@api_view(['GET'])
+def get_favorite_movies(request):
+    # user = request.user
+    if request.user.is_authenticated:
+        liked_movies = Movie.objects.filter(like_users=request.user)
+        serialized_movies = [{'title': movie.title, 'movie_id': movie.movie_id, 'poster_path':movie.poster_path, 'vote_average':movie.vote_average} for movie in liked_movies]
+        return JsonResponse(serialized_movies, safe=False)
+    return JsonResponse({'message': 'Authentication required.'}, status=401)
 
 # @api_view(['GET'])
 # def movie_list(request):

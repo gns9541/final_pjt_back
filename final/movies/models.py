@@ -1,7 +1,10 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 import requests
 import json
 import os
+from django.conf import settings
+
 
 
 class Genre(models.Model):
@@ -20,9 +23,19 @@ class Movie(models.Model):
     overview = models.TextField()
     poster_path = models.TextField()
     genre_id = models.ManyToManyField(Genre, related_name='genre_movies', blank=True)
-
+    like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='like_movies')
+    
     def __str__(self):
         return self.title
+    
+# User = get_user_model()
+
+# class UserFavoriteMovie(models.Model):
+#     user = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='like_reviews')
+#     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='favorited_by')
+
+#     def __str__(self):
+#         return f'{self.user.username} - {self.movie.title}'
 
 
 
