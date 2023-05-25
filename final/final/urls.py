@@ -23,4 +23,5 @@ urlpatterns = [
     path('accounts/signup/', include('dj_rest_auth.registration.urls')),
     path('comments/', include('comments.urls', namespace='comments')),
     path('users/', include('accounts.urls')),
+    path('community/', include("community.urls")),
 ]
