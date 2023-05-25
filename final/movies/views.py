@@ -6,6 +6,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_list_or_404, get_object_or_404
 from .models import Movie, Genre
+from comments.models import Comment
+from accounts.models import User
+import json
+
 from .serializers import GenreSearchSerializer, MovieSerializer, MovieDetailSerializers, GenreSerializer
 import random
 
@@ -70,28 +74,6 @@ def movie_search(request,searchKeyword):
     
     serializer = MovieSerializer(movies, many=True)
     return Response(serializer.data)
-
-
-# @login_required
-# @api_view(['POST'])
-# @authentication_classes([TokenAuthentication])
-# def add_favorite_movie(request, movie_id):
-#     if request.user.is_authenticated:
-#         movie = get_object_or_404(UserFavoriteMovie, pk=movie_id)
-#         # user = request.user
-
-#             # 이미 찜한 영화인지 확인
-#         if UserFavoriteMovie.objects.filter(user=user, movie=movie).exists():
-#                 return JsonResponse({'message': '이미 찜한 영화입니다.'}, status=400)
-            
-#             # 찜한 영화 추가
-#             favorite_movie = UserFavoriteMovie.objects.create(user=user, movie=movie)
-#             serializer = UserFavoriteMovieSerializer(favorite_movie)
-            
-#             return JsonResponse(serializer.data, status=201)
-        
-#         except Movie.DoesNotExist:
-#             return JsonResponse({'message': '영화를 찾을 수 없습니다.'}, status=404)
     
     
 @api_view(['GET','POST'])
@@ -137,6 +119,37 @@ def get_favorite_movies(request):
         serialized_movies = [{'title': movie.title, 'movie_id': movie.movie_id, 'poster_path':movie.poster_path, 'vote_average':movie.vote_average} for movie in liked_movies]
         return JsonResponse(serialized_movies, safe=False)
     return JsonResponse({'message': 'Authentication required.'}, status=401)
+
+
+def add_comment(request, movie_pk):
+    if request.method == 'POST':
+        # Vue.js로부터 전송된 JSON 데이터를 파싱하여 필요한 정보를 추출
+        data = json.loads(request.body)
+        text = data['text']
+        # user = data['user_id']
+
+        
+        movie = get_object_or_404(Movie, movie_pk=movie_pk)
+
+        
+        user = request.user
+
+        # Comment 모델에 코멘트 생성
+        comment = Comment.objects.create(text=text, user=user)
+
+        # 영화와 코멘트의 ManyToMany 관계 설정
+        movie.comment.add(comment)
+
+        # 응답 데이터 전송 (성공 여부 등)
+        response_data = {
+            'success': True,
+            'message': '코멘트가 추가되었습니다.'
+        }
+        return JsonResponse(response_data)
+
+    # POST 요청이 아닌 다른 요청에 대해서는 404 에러 반환
+    return JsonResponse({'error': '잘못된 요청입니다.'}, status=404)
+
 
 # @api_view(['GET'])
 # def movie_list(request):

@@ -4,6 +4,7 @@ import requests
 import json
 import os
 from django.conf import settings
+from comments.models import Comment
 
 
 
@@ -24,7 +25,8 @@ class Movie(models.Model):
     poster_path = models.TextField()
     genre_id = models.ManyToManyField(Genre, related_name='genre_movies', blank=True)
     like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='like_movies')
-    
+    comment = models.ManyToManyField(Comment, related_name='comment_movies', blank=True)
+
     def __str__(self):
         return self.title
     
