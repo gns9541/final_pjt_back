@@ -8,7 +8,7 @@ from .models import Article
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ['id', 'title', 'content', 'author', 'created_at']
+        fields = ['id', 'title', 'content', 'created_at']
 
 # class CommentSerializer(serializers.ModelSerializer):
 #     class UserSerializer(serializers.ModelSerializer):
